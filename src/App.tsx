@@ -68,7 +68,14 @@ export default function App() {
         };
       }
 
-      const result = await generateNewsflashes(inputText, fileData);
+      const timeoutPromise = new Promise<{ newsflashes: string, calculations: any }>((_, reject) => {
+        setTimeout(() => reject(new Error('Request timed out. The notification may be too large or the server is busy.')), 45000);
+      });
+
+      const result = await Promise.race([
+        generateNewsflashes(inputText, fileData),
+        timeoutPromise
+      ]);
       setOutput(result.newsflashes);
       setCalculations(result.calculations);
     } catch (err: any) {

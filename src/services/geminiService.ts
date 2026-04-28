@@ -111,8 +111,8 @@ export async function generateNewsflashes(text: string, fileData?: { data: strin
   }
 
   const result = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: parts,
+    model: "gemini-flash-latest",
+    contents: { parts },
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -148,15 +148,16 @@ export async function generateNewsflashes(text: string, fileData?: { data: strin
     }
   });
   
+  let responseText = "{}";
   try {
-    const responseText = result.text || "{}";
+    responseText = result.text || "{}";
     // Clean potential markdown code blocks
     const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanedJson);
   } catch (err) {
     console.error("Failed to parse Gemini response:", err);
     return {
-      newsflashes: result.text || "Error processing",
+      newsflashes: responseText !== "{}" ? responseText : "Error processing notification data.",
       calculations: {}
     };
   }
